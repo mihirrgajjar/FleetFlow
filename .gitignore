@@ -31,3 +31,4 @@ out/
 # Logs
 logs/
 *.log
+backend/.env
