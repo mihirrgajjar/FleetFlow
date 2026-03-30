@@ -1,27 +1,18 @@
-const nodemailer = require("nodemailer");
+const SibApiV3Sdk = require("@getbrevo/brevo");
 require("dotenv").config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT) || 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// ── Brevo API Client Setup ─────────────────────────────────────────────────
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+const apiKey = apiInstance.authentications["api-key"];
+apiKey.apiKey = process.env.BREVO_API_KEY;
 
+const SENDER_EMAIL = process.env.SENDER_EMAIL;
+const SENDER_NAME = process.env.SENDER_NAME || "FleetFlow";
+
+// ── Logo (unchanged) ───────────────────────────────────────────────────────
 const LOGO_PNG_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAACwAAAAsCAYAAAAehFoBAAAACXBIWXMAAAsTAAALEwEAmpwYAAACTklEQVR4nO2ZzW4TMRDH/Qot8YSWD7XcQOJBkGjFGZ4A6Af1CBC9VEi0d24gIg4cuTflEdpLuZG0lVrRA4hjmqTrSbZrZG8SpWnSONTBjpSR5rDR2v7tX/8dbzyMXRKnr6duR4IvEsI3ElCUglcIQblMqecUUNRrRMgXTsXELTZoVFcmb0jkHyVC7BqQ+j4AnBHC12g5O2MFKwU8kgjl/w1KF8FPpID5frDLjSf0CkttakvMLPVWNiBYaofuVLr6avJmCDagS+xRfXltul3dz76hqB808k+t0uWjGtDAwBBrJzBtat8wZJmR4M8ZIWz5BiH73NTABwGAKKsUUGQhVwfqSM3KbG9ODrfVVSI53HYCbQ3sIsgH8L8s0owxMI0Vhp7+T452VG3tXtge7ozkd2FgaD8v3dpdlfz6kUL/2Ve1t/cDB0YwymqFDfTRTvjA1IAedF7vdbgZY+CRVXhYQa6Br/q15upLzhq4BX783SwSb75T9GZGxfn1dNGfu07HkCtgJctmMVqdTX9bvZPKJMtOx5BzhfPrBiDe2rBXOG8/xhlwPfekqw/rucdOx5Ar4CaAUU1WjEr6ehhjqBvwiP0JLWmF93yDkH0WRu8gJUK+EACIssma4E+Z7imMxGGggLo5DEyPW3kueGDkH843YQSchAsLpcqLzNT5lgFmHoRoDWn6HNm57n0OzCyF1OeQAs50n7BfJ2k+BHtIhJIU2YfMJtTidU4C3us304sFBHy54Fmb0GVEH9OTgLzeZYaxjTfmLOhNoYb8Wat09Yi/PSUCekbboOoAAAAASUVORK5CYII=";
 
-const commonAttachments = [
-  {
-    filename: "logo.png",
-    content: Buffer.from(LOGO_PNG_BASE64, "base64"),
-    cid: "fleetflow-logo",
-    contentType: "image/png"
-  }
-];
-
+// ── HTML Template Builder (unchanged) ─────────────────────────────────────
 const buildEmailTemplate = (title, messageBody) => {
   return `
     <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #080c12; color: #e8edf5; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px;">
@@ -40,6 +31,26 @@ const buildEmailTemplate = (title, messageBody) => {
   `;
 };
 
+// ── Helper: build Brevo email object with inline logo ─────────────────────
+const buildSendSmtpEmail = (toEmail, subject, htmlContent, fromName) => {
+  const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+  sendSmtpEmail.sender = { email: SENDER_EMAIL, name: fromName || SENDER_NAME };
+  sendSmtpEmail.to = [{ email: toEmail }];
+  sendSmtpEmail.subject = subject;
+  sendSmtpEmail.htmlContent = htmlContent;
+
+  // Inline logo attachment (same CID as before: fleetflow-logo)
+  sendSmtpEmail.attachment = [
+    {
+      name: "logo.png",
+      content: LOGO_PNG_BASE64,
+    },
+  ];
+
+  return sendSmtpEmail;
+};
+
+// ── 1. OTP EMAIL (unchanged signature) ────────────────────────────────────
 const sendOTPEmail = async (toEmail, otp) => {
   const messageBody = `
     <p style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">We received a request to reset your password for your FleetFlow account. Use the OTP code below to proceed with the reset.</p>
@@ -49,17 +60,10 @@ const sendOTPEmail = async (toEmail, otp) => {
     <p style="font-size: 12px; color: #71717a; text-align: center;">This code will expire in 15 minutes. If you did not request a password reset, you can safely ignore this email.</p>
   `;
   const htmlContent = buildEmailTemplate("Password Reset Request", messageBody);
-
-  const mailOptions = {
-    from: `"FleetFlow Support" <${process.env.SMTP_USER}>`,
-    to: toEmail,
-    subject: "Your Password Reset OTP - FleetFlow",
-    html: htmlContent,
-    attachments: commonAttachments,
-  };
+  const sendSmtpEmail = buildSendSmtpEmail(toEmail, "Your Password Reset OTP - FleetFlow", htmlContent, "FleetFlow Support");
 
   try {
-    await transporter.sendMail(mailOptions);
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
     console.log("OTP email sent successfully to " + toEmail);
     return true;
   } catch (error) {
@@ -68,6 +72,7 @@ const sendOTPEmail = async (toEmail, otp) => {
   }
 };
 
+// ── 2. WELCOME EMAIL (unchanged signature) ────────────────────────────────
 const sendWelcomeEmail = async (toEmail, name) => {
   const greeting = name ? `Hi ${name},` : "Welcome!";
   const messageBody = `
@@ -79,17 +84,10 @@ const sendWelcomeEmail = async (toEmail, name) => {
     </div>
   `;
   const htmlContent = buildEmailTemplate("Welcome to FleetFlow", messageBody);
-
-  const mailOptions = {
-    from: `"FleetFlow Accounts" <${process.env.SMTP_USER}>`,
-    to: toEmail,
-    subject: "Welcome to FleetFlow!",
-    html: htmlContent,
-    attachments: commonAttachments,
-  };
+  const sendSmtpEmail = buildSendSmtpEmail(toEmail, "Welcome to FleetFlow!", htmlContent, "FleetFlow Accounts");
 
   try {
-    await transporter.sendMail(mailOptions);
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
     console.log("Welcome email sent to " + toEmail);
     return true;
   } catch (error) {
@@ -98,6 +96,7 @@ const sendWelcomeEmail = async (toEmail, name) => {
   }
 };
 
+// ── 3. PASSWORD CHANGE EMAIL (unchanged signature) ────────────────────────
 const sendPasswordChangeEmail = async (toEmail) => {
   const timestamp = new Date().toLocaleString();
   const messageBody = `
@@ -108,17 +107,10 @@ const sendPasswordChangeEmail = async (toEmail) => {
     </div>
   `;
   const htmlContent = buildEmailTemplate("Security Alert", messageBody);
-
-  const mailOptions = {
-    from: `"FleetFlow Security" <${process.env.SMTP_USER}>`,
-    to: toEmail,
-    subject: "Security Alert: Password Changed",
-    html: htmlContent,
-    attachments: commonAttachments,
-  };
+  const sendSmtpEmail = buildSendSmtpEmail(toEmail, "Security Alert: Password Changed", htmlContent, "FleetFlow Security");
 
   try {
-    await transporter.sendMail(mailOptions);
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
     console.log("Password change email sent to " + toEmail);
     return true;
   } catch (error) {
@@ -127,6 +119,7 @@ const sendPasswordChangeEmail = async (toEmail) => {
   }
 };
 
+// ── 4. BILL EMAIL (unchanged signature) ───────────────────────────────────
 const sendBillEmail = async (toEmail, trip, companyInfo, pdfBase64, customerName) => {
   const messageBody = `
     <p style="font-size: 16px; font-weight: 600; color: #e8edf5;">Hello${customerName ? ` ${customerName}` : ''},</p>
@@ -156,26 +149,26 @@ const sendBillEmail = async (toEmail, trip, companyInfo, pdfBase64, customerName
   `;
 
   const htmlContent = buildEmailTemplate(`Invoice: ${trip.id}`, messageBody);
+  const sendSmtpEmail = buildSendSmtpEmail(
+    toEmail,
+    `Your Trip Invoice - ${trip.id}`,
+    htmlContent,
+    `${companyInfo?.name || 'FleetFlow'} Billing`
+  );
 
-  const attachments = [...commonAttachments];
+  // Attach PDF if provided
   if (pdfBase64) {
-    attachments.push({
-      filename: `Bill_${trip.id}.pdf`,
-      content: Buffer.from(pdfBase64, 'base64'),
-      contentType: 'application/pdf'
-    });
+    sendSmtpEmail.attachment = [
+      ...sendSmtpEmail.attachment,
+      {
+        name: `Bill_${trip.id}.pdf`,
+        content: pdfBase64,
+      },
+    ];
   }
 
-  const mailOptions = {
-    from: `"${companyInfo?.name || 'FleetFlow'} Billing" <${process.env.SMTP_USER}>`,
-    to: toEmail,
-    subject: `Your Trip Invoice - ${trip.id}`,
-    html: htmlContent,
-    attachments: attachments,
-  };
-
   try {
-    await transporter.sendMail(mailOptions);
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
     console.log("Bill email sent successfully to " + toEmail);
     return true;
   } catch (error) {
