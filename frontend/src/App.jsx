@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import LoginPage from './Pages/Loginpage'
+import LoginPage from './Pages/LoginPage'
 import Home from './Pages/Home'
 import Dashboard from './Pages/Dashboard'
 import VehicleRegistry from './Pages/VehicleRegistry'
@@ -15,10 +15,10 @@ import api from './api'
 // ── Role-Based Access Control ─────────────────────────────
 // Defines which pages each role can access
 export const ROLE_PERMISSIONS = {
-  Manager:    ["dashboard", "vehicles", "trips", "maintenance", "fuel", "drivers", "analytics"],
+  Manager: ["dashboard", "vehicles", "trips", "maintenance", "fuel", "drivers", "analytics"],
   Dispatcher: ["dashboard", "vehicles", "trips", "drivers"],
-  Safety:     ["dashboard", "maintenance", "drivers"],
-  Analyst:    ["dashboard", "fuel", "analytics"],
+  Safety: ["dashboard", "maintenance", "drivers"],
+  Analyst: ["dashboard", "fuel", "analytics"],
 }
 
 export const canAccess = (role, page) => {
@@ -29,8 +29,8 @@ export const canAccess = (role, page) => {
 // ─────────────────────────────────────────────────────────
 
 function App() {
-  const [user,  setUser]  = useState(null)
-  
+  const [user, setUser] = useState(null)
+
   // Disable automatic scroll restoration for cleaner manual transitions
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
@@ -38,7 +38,7 @@ function App() {
     }
   }, [])
 
-  const [page,  setPage]  = useState(() => {
+  const [page, setPage] = useState(() => {
     // Check URL hash for page state on initial load
     const hash = window.location.hash.replace('#', '')
     return hash || "home"
@@ -82,16 +82,16 @@ function App() {
   }, [])
 
 
-  const handleLogin  = (userData) => { 
-    setUser(userData); 
-    setPage("dashboard"); 
-    api.defaults.headers.common['x-user-email']  = userData.email;
-    api.defaults.headers.common['x-user-role']   = userData.role;
-    api.defaults.headers.common['x-company-id']  = userData.companyId || 'demo';
+  const handleLogin = (userData) => {
+    setUser(userData);
+    setPage("dashboard");
+    api.defaults.headers.common['x-user-email'] = userData.email;
+    api.defaults.headers.common['x-user-role'] = userData.role;
+    api.defaults.headers.common['x-company-id'] = userData.companyId || 'demo';
   }
-  const handleLogout = () => { 
-    setUser(null); 
-    setPage("home"); 
+  const handleLogout = () => {
+    setUser(null);
+    setPage("home");
     delete api.defaults.headers.common['x-user-email'];
     delete api.defaults.headers.common['x-user-role'];
     delete api.defaults.headers.common['x-company-id'];
@@ -143,22 +143,22 @@ function App() {
 
   const props = {
     user,
-    onNavigate:    handleNavigate,
-    onLogout:      handleLogout,
+    onNavigate: handleNavigate,
+    onLogout: handleLogout,
     theme,
     onToggleTheme: handleToggle,
-    permissions:   ROLE_PERMISSIONS[user.role] ?? [],
+    permissions: ROLE_PERMISSIONS[user.role] ?? [],
   }
 
   switch (page) {
-    case "home":        return <Home {...props} onNavigate={setPageWithHistory} />
-    case "dashboard":   return <Dashboard      {...props} />
-    case "vehicles":    return <VehicleRegistry {...props} />
-    case "trips":       return <TripDispatcher  {...props} />
+    case "home": return <Home {...props} onNavigate={setPageWithHistory} />
+    case "dashboard": return <Dashboard      {...props} />
+    case "vehicles": return <VehicleRegistry {...props} />
+    case "trips": return <TripDispatcher  {...props} />
     case "maintenance": return <MaintenanceLogs {...props} />
-    case "fuel":        return <FuelExpenses    {...props} />
-    case "drivers":     return <DriverProfiles  {...props} />
-    case "analytics":   return <Analytics       {...props} />
+    case "fuel": return <FuelExpenses    {...props} />
+    case "drivers": return <DriverProfiles  {...props} />
+    case "analytics": return <Analytics       {...props} />
     case "about":
     case "careers":
     case "contact":
@@ -167,8 +167,8 @@ function App() {
     case "api":
     case "privacy":
     case "terms":
-    case "security":    return <InfoPage type={page} onNavigate={setPageWithHistory} />
-    default:            return <Dashboard       {...props} />
+    case "security": return <InfoPage type={page} onNavigate={setPageWithHistory} />
+    default: return <Dashboard       {...props} />
   }
 }
 
