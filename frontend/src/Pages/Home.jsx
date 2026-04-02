@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import HomeFooter from '../Components/HomeFooter'
-import '../Styles/global.css'
+import '../styles/global.css'
 
 // SVG Icons - Professional Industry Set
 const TruckIcon = () => (

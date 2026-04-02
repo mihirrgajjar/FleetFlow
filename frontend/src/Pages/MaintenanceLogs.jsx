@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../Styles/global.css";
+import "../styles/global.css";
 import { Sidebar } from './Dashboard';
 import "../styles/modal.css";
 import api from '../api';

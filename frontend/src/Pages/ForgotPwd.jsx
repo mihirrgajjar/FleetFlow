@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../Styles/global.css";
+import "../styles/global.css";
 import { FiMail, FiLock, FiArrowLeft, FiCheckCircle, FiArrowRight, FiKey } from "react-icons/fi";
 import PasswordInput from "../Components/PasswordInput";
 
@@ -89,9 +89,9 @@ export default function ForgotPwd({ onBack }) {
       <div className="grid-bg" />
       <div className="orb orb-1" />
       <div className="orb orb-2" />
-      
+
       <div className="right-panel fade-in" style={{ margin: "auto", maxWidth: 480, width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "40px", zIndex: 10 }}>
-        
+
         {step !== 4 && (
           <button onClick={onBack} className="btn-secondary" style={{ marginBottom: 24, width: "fit-content", padding: "6px 12px", border: "none", background: "transparent", color: "var(--muted)" }}>
             <FiArrowLeft /> Back to Sign In

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import HomeFooter from '../Components/HomeFooter'
-import '../Styles/global.css'
+import '../styles/global.css'
 
 const TruckIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="40" height="40">
@@ -210,11 +210,11 @@ export default function InfoPage({ type, onNavigate }) {
       window.scrollTo(0, 0);
       document.body.scrollTo(0, 0);
       document.documentElement.scrollTo(0, 0);
-      
+
       if (topRef.current) {
         topRef.current.scrollIntoView({ behavior: 'smooth' });
       }
-      
+
       // Fallback with a slight delay
       setTimeout(() => {
         window.scrollTo(0, 0);
@@ -228,7 +228,7 @@ export default function InfoPage({ type, onNavigate }) {
   return (
     <div id="top" ref={topRef} className="home-page info-page-wrapper">
       <PageHeader onNavigate={onNavigate} />
-      
+
       <div className="info-hero">
         <div className="info-hero-content">
           <h1 className="info-hero-title">{content.title}</h1>
@@ -243,7 +243,7 @@ export default function InfoPage({ type, onNavigate }) {
               <p>{section.content}</p>
             </ContentSection>
           ))}
-          
+
           <div className="info-cta">
             <h3>Ready to see it in action?</h3>
             <button className="home-btn home-btn-large home-btn-glow" onClick={() => onNavigate('login')}>
@@ -255,7 +255,8 @@ export default function InfoPage({ type, onNavigate }) {
 
       <HomeFooter onNavigate={onNavigate} />
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .info-page-wrapper {
           background: var(--bg-primary);
           color: var(--text-primary);

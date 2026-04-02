@@ -1043,7 +1043,7 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
     // CRITICAL: Use ONLY totalKM for all calculations. extraKM is metadata only.
     // totalKM already includes any extra distance traveled.
     const actualDistance = Number(trip.totalkm || trip.totalKM || 0);
-    
+
     const normalizedCosts = {
       tollCost: customerName?.tollCost ?? Number(trip.tollcost || trip.tollCost || 0),
       otherCost: customerName?.otherCost ?? Number(trip.othercost || trip.otherCost || 0),
@@ -1061,7 +1061,7 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
     // ═══════════════════════════════════════════════════════════════════════════
     // HEADER SECTION - Premium Design
     // ═══════════════════════════════════════════════════════════════════════════
-    
+
     // Top gradient bar
     doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.rect(0, 0, 210, 35, 'F');
@@ -1070,36 +1070,36 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
     // Orange rounded rectangle background (44x44 with rx=12)
     doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.roundedRect(14, 8, 22, 22, 3, 3, 'F');
-    
+
     // White truck icon - EXACT from SVG with stroke, NO fill
     doc.setDrawColor(255, 255, 255);
     doc.setLineWidth(1);
-    
+
     // Base position after transform translate(10, 10)
     const baseX = 19;
     const baseY = 13;
     const s = 0.5; // scale factor
-    
+
     // Cargo box: <rect x="1" y="3" width="15" height="13" fill="none" stroke="#ffffff" stroke-width="2"/>
-    doc.rect(baseX + 1*s, baseY + 3*s, 15*s, 13*s, 'S');
-    
+    doc.rect(baseX + 1 * s, baseY + 3 * s, 15 * s, 13 * s, 'S');
+
     // Cab: <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" fill="none" stroke="#ffffff" stroke-width="2"/>
-    doc.line(baseX + 16*s, baseY + 8*s, baseX + 20*s, baseY + 8*s);
-    doc.line(baseX + 20*s, baseY + 8*s, baseX + 23*s, baseY + 11*s);
-    doc.line(baseX + 23*s, baseY + 11*s, baseX + 23*s, baseY + 16*s);
-    doc.line(baseX + 23*s, baseY + 16*s, baseX + 16*s, baseY + 16*s);
-    doc.line(baseX + 16*s, baseY + 16*s, baseX + 16*s, baseY + 8*s);
-    
+    doc.line(baseX + 16 * s, baseY + 8 * s, baseX + 20 * s, baseY + 8 * s);
+    doc.line(baseX + 20 * s, baseY + 8 * s, baseX + 23 * s, baseY + 11 * s);
+    doc.line(baseX + 23 * s, baseY + 11 * s, baseX + 23 * s, baseY + 16 * s);
+    doc.line(baseX + 23 * s, baseY + 16 * s, baseX + 16 * s, baseY + 16 * s);
+    doc.line(baseX + 16 * s, baseY + 16 * s, baseX + 16 * s, baseY + 8 * s);
+
     // Wheels: <circle cx="5.5" cy="18.5" r="2.5" fill="none" stroke="#ffffff" stroke-width="2"/>
-    doc.circle(baseX + 5.5*s, baseY + 18.5*s, 2.5*s, 'S');
-    doc.circle(baseX + 18.5*s, baseY + 18.5*s, 2.5*s, 'S');
+    doc.circle(baseX + 5.5 * s, baseY + 18.5 * s, 2.5 * s, 'S');
+    doc.circle(baseX + 18.5 * s, baseY + 18.5 * s, 2.5 * s, 'S');
 
     // Company name and tagline
     doc.setFontSize(18);
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.text(String(companyName).toUpperCase(), 38, 18);
-    
+
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(220, 220, 220);
@@ -1110,7 +1110,7 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.text('INVOICE', 160, 18);
-    
+
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(220, 220, 220);
@@ -1119,7 +1119,7 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
     // ═══════════════════════════════════════════════════════════════════════════
     // TRIP INFO SECTION
     // ═══════════════════════════════════════════════════════════════════════════
-    
+
     let yPos = 45;
 
     // Trip details in two columns
@@ -1133,11 +1133,11 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-    
+
     doc.text('Trip ID:', 14, yPos);
     doc.setFont("helvetica", "bold");
     doc.text(trip.id || "N/A", 35, yPos);
-    
+
     doc.setFont("helvetica", "normal");
     doc.text('Date:', 14, yPos + 6);
     doc.setFont("helvetica", "bold");
@@ -1153,7 +1153,7 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
     doc.text('Vehicle:', 110, yPos);
     doc.setFont("helvetica", "bold");
     doc.text(trip.vehicleName || "N/A", 130, yPos);
-    
+
     doc.setFont("helvetica", "normal");
     doc.text('Driver:', 110, yPos + 6);
     doc.setFont("helvetica", "bold");
@@ -1175,32 +1175,32 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
     // ═══════════════════════════════════════════════════════════════════════════
     // ROUTE SECTION
     // ═══════════════════════════════════════════════════════════════════════════
-    
+
     doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.rect(14, yPos - 3, 182, 12, 'F');
-    
+
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
     doc.text('ROUTE DETAILS', 18, yPos + 2);
-    
+
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.text('FROM: ' + (trip.fromlocation || trip.fromLocation || "N/A"), 18, yPos + 7);
     doc.text('TO: ' + (trip.tolocation || trip.toLocation || "N/A"), 110, yPos + 7);
-    
+
     yPos += 18;
 
     // ═══════════════════════════════════════════════════════════════════════════
     // CHARGES TABLE - Enhanced Design with proper price formatting
     // ═══════════════════════════════════════════════════════════════════════════
-    
+
     // Format prices properly to avoid encoding issues
     const baseCostFormatted = 'Rs. ' + Number(trip.basecost || trip.baseCost || 0).toLocaleString('en-IN');
     const tollCostFormatted = 'Rs. ' + normalizedCosts.tollCost.toLocaleString('en-IN');
     const otherCostFormatted = 'Rs. ' + normalizedCosts.otherCost.toLocaleString('en-IN');
     const totalCostFormatted = 'Rs. ' + normalizedCosts.totalCost.toLocaleString('en-IN');
-    
+
     autoTable(doc, {
       startY: yPos,
       head: [['Description', 'Details', 'Amount (INR)']],
@@ -1211,8 +1211,8 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
       ],
       foot: [['', 'TOTAL BILLABLE AMOUNT', totalCostFormatted]],
       theme: 'grid',
-      headStyles: { 
-        fillColor: primaryColor, 
+      headStyles: {
+        fillColor: primaryColor,
         textColor: 255,
         fontStyle: 'bold',
         fontSize: 10,
@@ -1226,9 +1226,9 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
         textColor: darkColor,
         font: 'helvetica'
       },
-      footStyles: { 
-        fillColor: [44, 62, 80], 
-        textColor: 255, 
+      footStyles: {
+        fillColor: [44, 62, 80],
+        textColor: 255,
         fontStyle: 'bold',
         fontSize: 11,
         cellPadding: 5,
@@ -1247,15 +1247,15 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
     // ═══════════════════════════════════════════════════════════════════════════
     // SUMMARY BOX
     // ═══════════════════════════════════════════════════════════════════════════
-    
+
     doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
     doc.rect(14, yPos, 182, 20, 'F');
-    
+
     doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
     doc.text('TRIP SUMMARY', 18, yPos + 5);
-    
+
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(accentGray[0], accentGray[1], accentGray[2]);
@@ -1267,19 +1267,19 @@ export default function TripDispatcher({ user, onNavigate, onLogout, theme, onTo
     // ═══════════════════════════════════════════════════════════════════════════
     // FOOTER SECTION
     // ═══════════════════════════════════════════════════════════════════════════
-    
+
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
     doc.setFont("helvetica", "normal");
     doc.text("This is a computer-generated invoice and does not require a physical signature.", 14, yPos);
     doc.text('Registered Office: ' + companyName + ', Industrial Estate, ' + companyInd + ' Division', 14, yPos + 5);
-    
+
     // Bottom branding
     doc.setFontSize(7);
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.setFont("helvetica", "bold");
     doc.text("Powered by FleetFlow — Intelligent Logistics Solutions", 14, yPos + 12);
-    
+
     // Page number
     doc.setFontSize(7);
     doc.setTextColor(200, 200, 200);

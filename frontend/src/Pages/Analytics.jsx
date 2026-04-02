@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../Styles/global.css";
+import "../styles/global.css";
 import { Sidebar } from './Dashboard';
 import api from '../api';
 import {
@@ -10,20 +10,20 @@ import { LuBike } from "react-icons/lu";
 
 // Helpers 
 const TYPE_ICONS = {
-  Van:          <FiTruck size={18} />,
-  Truck:        <FiTruck size={18} />,
+  Van: <FiTruck size={18} />,
+  Truck: <FiTruck size={18} />,
   "Mini-Truck": <FiTruck size={18} />,
-  Bike:         <LuBike  size={18} />,
+  Bike: <LuBike size={18} />,
 };
 
-const n   = (v, fallback = 0) => parseFloat(v ?? fallback) || fallback;
+const n = (v, fallback = 0) => parseFloat(v ?? fallback) || fallback;
 const fmt = (v) => Math.round(v).toLocaleString();
 const fmtK = (v) => v >= 1000 ? `₹${(v / 1000).toFixed(1)}K` : `₹${Math.round(v)}`;
 const scoreColor = (s) => s >= 85 ? "var(--success)" : s >= 65 ? "var(--warning)" : "var(--danger)";
 const maxOf = (arr, key) => Math.max(...arr.map(a => a[key] ?? 0), 1);
 
 const vid = (t) => t.vehicleid || t.vehicleId;
-const did = (t) => t.driverid  || t.driverId;
+const did = (t) => t.driverid || t.driverId;
 
 /*CSV export*/
 function downloadCSV(filename, headers, rows) {
@@ -37,15 +37,15 @@ function downloadCSV(filename, headers, rows) {
 function getPeriodCutoff(p) {
   const now = new Date();
   return {
-    "1M": new Date(now.getFullYear(), now.getMonth() - 1,  now.getDate()),
-    "3M": new Date(now.getFullYear(), now.getMonth() - 3,  now.getDate()),
-    "6M": new Date(now.getFullYear(), now.getMonth() - 6,  now.getDate()),
+    "1M": new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()),
+    "3M": new Date(now.getFullYear(), now.getMonth() - 3, now.getDate()),
+    "6M": new Date(now.getFullYear(), now.getMonth() - 6, now.getDate()),
     "1Y": new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()),
   }[p] ?? new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
 }
 
 function getMonthBuckets(period) {
-  const names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const count = { "1M": 1, "3M": 3, "6M": 6, "1Y": 12 }[period] ?? 6;
   const now = new Date();
   return Array.from({ length: count }, (_, i) => {
@@ -56,12 +56,12 @@ function getMonthBuckets(period) {
 
 // ── Main Component 
 export default function Analytics({ user, onNavigate, onLogout, theme, onToggleTheme, permissions = [] }) {
-  const [period,      setPeriod]      = useState("6M");
-  const [vehicles,    setVehicles]    = useState([]);
-  const [trips,       setTrips]       = useState([]);
-  const [expenses,    setExpenses]    = useState([]);
+  const [period, setPeriod] = useState("6M");
+  const [vehicles, setVehicles] = useState([]);
+  const [trips, setTrips] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [maintenance, setMaintenance] = useState([]);
-  const [drivers,     setDrivers]     = useState([]);
+  const [drivers, setDrivers] = useState([]);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -77,28 +77,28 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
   };
 
   /*Period-filtered sets */
-  const cutoff       = getPeriodCutoff(period);
-  const fTrips       = trips.filter(t => new Date(t.date) >= cutoff);
-  const fExpenses    = expenses.filter(e => new Date(e.date) >= cutoff);
+  const cutoff = getPeriodCutoff(period);
+  const fTrips = trips.filter(t => new Date(t.date) >= cutoff);
+  const fExpenses = expenses.filter(e => new Date(e.date) >= cutoff);
   const fMaintenance = maintenance.filter(m => new Date(m.date) >= cutoff);
   const monthBuckets = getMonthBuckets(period);
 
   const completedTrips = fTrips.filter(t => t.status === "completed");
 
   /*  Real cost aggregates from trips  */
-  const totalTripCost  = completedTrips.reduce((s, t) => s + n(t.totalcost || t.totalCost), 0);
-  const totalTollCost  = completedTrips.reduce((s, t) => s + n(t.tollcost  || t.tollCost),  0);
+  const totalTripCost = completedTrips.reduce((s, t) => s + n(t.totalcost || t.totalCost), 0);
+  const totalTollCost = completedTrips.reduce((s, t) => s + n(t.tollcost || t.tollCost), 0);
   const totalOtherCost = completedTrips.reduce((s, t) => s + n(t.othercost || t.otherCost), 0);
-  const totalBaseCost  = completedTrips.reduce((s, t) => s + n(t.basecost  || t.baseCost),  0);
+  const totalBaseCost = completedTrips.reduce((s, t) => s + n(t.basecost || t.baseCost), 0);
 
   /*  Expense-based costs  */
-  const totalFuelCost  = fExpenses.filter(e => e.type === "fuel").reduce((s, e) => s + n(e.cost), 0);
+  const totalFuelCost = fExpenses.filter(e => e.type === "fuel").reduce((s, e) => s + n(e.cost), 0);
   const totalMaintCost = fMaintenance.reduce((s, m) => s + n(m.cost), 0);
-  const totalOpCost    = totalFuelCost + totalMaintCost;
+  const totalOpCost = totalFuelCost + totalMaintCost;
 
   /*  Fleet KM  */
   // CRITICAL: Use ONLY totalKM. extraKM is metadata only and already included in totalKM.
-  const totalKM        = completedTrips.reduce((s, t) => s + n(t.totalkm || t.totalKM), 0);
+  const totalKM = completedTrips.reduce((s, t) => s + n(t.totalkm || t.totalKM), 0);
 
   /*  Completion rate  */
   const completionRate = fTrips.length > 0 ? Math.round((completedTrips.length / fTrips.length) * 100) : 0;
@@ -107,7 +107,7 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
   const MONTHLY_COST = monthBuckets.map(mb => ({
     month: mb.label,
     cost: completedTrips.filter(t => { const d = new Date(t.date); return d.getMonth() === mb.m && d.getFullYear() === mb.y; })
-                        .reduce((s, t) => s + n(t.totalcost || t.totalCost), 0),
+      .reduce((s, t) => s + n(t.totalcost || t.totalCost), 0),
   }));
 
   const MONTHLY_TRIPS = monthBuckets.map(mb => ({
@@ -117,35 +117,35 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
 
   const MONTHLY_FUEL = monthBuckets.map(mb => ({
     month: mb.label,
-    cost:  fExpenses.filter(e => { if (e.type !== "fuel") return false; const d = new Date(e.date); return d.getMonth() === mb.m && d.getFullYear() === mb.y; })
-                    .reduce((s, e) => s + n(e.cost), 0),
+    cost: fExpenses.filter(e => { if (e.type !== "fuel") return false; const d = new Date(e.date); return d.getMonth() === mb.m && d.getFullYear() === mb.y; })
+      .reduce((s, e) => s + n(e.cost), 0),
   }));
 
-  const mxCost  = maxOf(MONTHLY_COST,  "cost");
+  const mxCost = maxOf(MONTHLY_COST, "cost");
   const mxTrips = maxOf(MONTHLY_TRIPS, "trips");
-  const mxFuel  = maxOf(MONTHLY_FUEL,  "cost");
+  const mxFuel = maxOf(MONTHLY_FUEL, "cost");
 
   /*  Vehicle stats  */
   const VEHICLE_STATS = vehicles.map(v => {
-    const vTrips     = fTrips.filter(t => vid(t) === v.id);
+    const vTrips = fTrips.filter(t => vid(t) === v.id);
     const vCompleted = vTrips.filter(t => t.status === "completed");
-    const vCost      = vCompleted.reduce((s, t) => s + n(t.totalcost || t.totalCost), 0);
+    const vCost = vCompleted.reduce((s, t) => s + n(t.totalcost || t.totalCost), 0);
     // CRITICAL: Use ONLY totalKM. extraKM is metadata only and already included in totalKM.
-    const vKM        = vCompleted.reduce((s, t) => s + n(t.totalkm || t.totalKM), 0);
-    const vFuel      = fExpenses.filter(e => (e.vehicleid || e.vehicleId) === v.id && e.type === "fuel").reduce((s, e) => s + n(e.cost), 0);
-    const vMaint     = fMaintenance.filter(m => (m.vehicleid || m.vehicleId) === v.id).reduce((s, m) => s + n(m.cost), 0);
+    const vKM = vCompleted.reduce((s, t) => s + n(t.totalkm || t.totalKM), 0);
+    const vFuel = fExpenses.filter(e => (e.vehicleid || e.vehicleId) === v.id && e.type === "fuel").reduce((s, e) => s + n(e.cost), 0);
+    const vMaint = fMaintenance.filter(m => (m.vehicleid || m.vehicleId) === v.id).reduce((s, m) => s + n(m.cost), 0);
     return { id: v.id, name: v.name, type: v.type, trips: vTrips.length, completed: vCompleted.length, cost: vCost, km: vKM, fuel: vFuel, maint: vMaint };
   });
 
   const TOP5_COSTLY = [...VEHICLE_STATS].sort((a, b) => (b.fuel + b.maint) - (a.fuel + a.maint)).slice(0, 5);
-  const mxVCost     = Math.max(...TOP5_COSTLY.map(v => v.fuel + v.maint), 1);
+  const mxVCost = Math.max(...TOP5_COSTLY.map(v => v.fuel + v.maint), 1);
 
   /*  Driver stats  */
   const DRIVER_PERF = drivers.map(d => {
-    const dTrips     = fTrips.filter(t => did(t) === d.id);
+    const dTrips = fTrips.filter(t => did(t) === d.id);
     const dCompleted = dTrips.filter(t => t.status === "completed");
     // CRITICAL: Use ONLY totalKM. extraKM is metadata only and already included in totalKM.
-    const dKM        = dCompleted.reduce((s, t) => s + n(t.totalkm || t.totalKM), 0);
+    const dKM = dCompleted.reduce((s, t) => s + n(t.totalkm || t.totalKM), 0);
     return {
       name: d.name, trips: dTrips.length, completed: dCompleted.length,
       km: dKM, score: n(d.safetyscore ?? d.safetyScore, 0),
@@ -162,9 +162,9 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
   /*  Cost split (4 real categories)  */
   const costItems = [
     { label: "Base KM Cost", val: totalBaseCost, color: "var(--accent)" },
-    { label: "Toll Charges",  val: totalTollCost,  color: "var(--warning)" },
-    { label: "Other Expenses",val: totalOtherCost, color: "#60a5fa" },
-    { label: "Fuel Cost",     val: totalFuelCost,  color: "var(--danger)" },
+    { label: "Toll Charges", val: totalTollCost, color: "var(--warning)" },
+    { label: "Other Expenses", val: totalOtherCost, color: "#60a5fa" },
+    { label: "Fuel Cost", val: totalFuelCost, color: "var(--danger)" },
   ];
   const costTotal = costItems.reduce((s, c) => s + c.val, 0) || 1;
 
@@ -173,25 +173,25 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
     const ds = new Date().toISOString().split("T")[0];
     switch (type) {
       case "Full": downloadCSV(`fleet_analytics_${period}_${ds}.csv`,
-        ["Vehicle","Type","Trips","Completed","Trip Cost (₹)","KM Driven","Fuel Cost (₹)","Maintenance (₹)"],
+        ["Vehicle", "Type", "Trips", "Completed", "Trip Cost (₹)", "KM Driven", "Fuel Cost (₹)", "Maintenance (₹)"],
         VEHICLE_STATS.map(v => [v.name, v.type, v.trips, v.completed, v.cost, v.km, v.fuel, v.maint])
       ); break;
       case "Trips": downloadCSV(`trip_summary_${period}_${ds}.csv`,
-        ["Month","Trips"], MONTHLY_TRIPS.map(m => [m.month, m.trips])
+        ["Month", "Trips"], MONTHLY_TRIPS.map(m => [m.month, m.trips])
       ); break;
       case "Fuel": downloadCSV(`fuel_audit_${period}_${ds}.csv`,
-        ["Month","Fuel Cost (₹)"], MONTHLY_FUEL.map(m => [m.month, m.cost])
+        ["Month", "Fuel Cost (₹)"], MONTHLY_FUEL.map(m => [m.month, m.cost])
       ); break;
       case "Payroll": downloadCSV(`payroll_report_${period}_${ds}.csv`,
-        ["Driver","Category","License","Trips","Completed","KM Driven","Safety Score","Phone"],
+        ["Driver", "Category", "License", "Trips", "Completed", "KM Driven", "Safety Score", "Phone"],
         DRIVER_PERF.map(d => [d.name, d.category, d.license, d.trips, d.completed, d.km, d.score, d.phone])
       ); break;
       case "Health": downloadCSV(`vehicle_health_${ds}.csv`,
-        ["Vehicle","Type","Status","Odometer (km)","Maint Cost (₹)"],
+        ["Vehicle", "Type", "Status", "Odometer (km)", "Maint Cost (₹)"],
         vehicles.map(v => { const vs = VEHICLE_STATS.find(s => s.id === v.id) || {}; return [v.name, v.type, v.status, v.odometer, vs.maint ?? 0]; })
       ); break;
       case "Compliance": downloadCSV(`driver_compliance_${ds}.csv`,
-        ["Driver","License","Category","Expiry","Safety Score","Phone"],
+        ["Driver", "License", "Category", "Expiry", "Safety Score", "Phone"],
         drivers.map(d => [d.name, d.license, d.category, d.expiry?.split("T")[0] ?? "N/A", d.safetyscore ?? 0, d.phone])
       ); break;
       default: break;
@@ -208,20 +208,20 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
     // Show all data points, not just > 0
     const pts = data;
     if (pts.length === 0) return <Empty />;
-    
+
     const W = 500, H = 160, PAD = 40;
     const values = pts.map(p => p[keyName] || 0);
     const maxV = Math.max(...values, 1);
     const minV = Math.min(...values);
     const range = maxV - minV || 1;
-    
+
     const toX = i => PAD + i * ((W - PAD * 2) / Math.max(pts.length - 1, 1));
     const toY = v => PAD + (1 - (v - minV) / range) * (H - PAD * 2);
-    
+
     const validPts = pts.filter(p => p[keyName] > 0);
     const poly = validPts.map((p, i) => `${toX(i)},${toY(p[keyName])}`).join(" ");
     const area = validPts.length > 0 ? `${toX(0)},${H - PAD} ${poly} ${toX(validPts.length - 1)},${H - PAD}` : "";
-    
+
     return (
       <div style={{ width: "100%", height: 180, padding: "10px 0" }}>
         <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "100%", overflow: "visible" }} preserveAspectRatio="none">
@@ -233,22 +233,22 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
               <g key={f}>
                 <line x1={PAD} y1={y} x2={W - PAD} y2={y} stroke="var(--border)" strokeWidth={1} strokeDasharray="4 4" opacity={0.5} />
                 <text x={PAD - 8} y={y + 4} fontSize={9} fill="var(--muted)" textAnchor="end" fontWeight={500}>
-                  {val >= 1000 ? `₹${(val/1000).toFixed(1)}K` : `₹${Math.round(val)}`}
+                  {val >= 1000 ? `₹${(val / 1000).toFixed(1)}K` : `₹${Math.round(val)}`}
                 </text>
               </g>
             );
           })}
-          
+
           {/* Area fill */}
           {validPts.length > 1 && (
             <polygon points={area} fill={`${color}20`} />
           )}
-          
+
           {/* Line */}
           {validPts.length > 1 && (
             <polyline points={poly} fill="none" stroke={color} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
           )}
-          
+
           {/* Data points and labels */}
           {pts.map((p, i) => (
             <g key={i}>
@@ -283,7 +283,7 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
             <div className="topbar-sub">Real-time data — trip costs, fuel, driver performance</div>
           </div>
           <div className="topbar-right">
-            {["1M","3M","6M","1Y"].map(p => (
+            {["1M", "3M", "6M", "1Y"].map(p => (
               <button key={p} className={`filter-btn ${period === p ? "active" : ""}`}
                 style={{ padding: "5px 12px" }} onClick={() => setPeriod(p)}>{p}</button>
             ))}
@@ -296,10 +296,10 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
           {/* ── KPI Cards ── */}
           <div className="kpi-grid" style={{ marginBottom: 20 }}>
             {[
-              { label: "Total Trip Cost",   val: fmtK(totalTripCost),  sub: `From ${completedTrips.length} completed trips (${period})`, icon: <span style={{ fontSize: 18, fontWeight: 700 }}>₹</span>, color: "var(--success)" },
-              { label: "Operational Cost",  val: fmtK(totalOpCost),    sub: "Fuel + Maintenance expenses",                               icon: <FiDroplet size={18} />,     color: "var(--danger)"  },
-              { label: "Completion Rate",   val: `${completionRate}%`, sub: `${completedTrips.length} / ${fTrips.length} trips done`,    icon: <FiCheckCircle size={18} />, color: "var(--accent)"  },
-              { label: "Total KM Covered",  val: `${fmt(totalKM)} km`, sub: `Across all completed trips`,                                icon: <FiActivity size={18} />,    color: "#60a5fa"        },
+              { label: "Total Trip Cost", val: fmtK(totalTripCost), sub: `From ${completedTrips.length} completed trips (${period})`, icon: <span style={{ fontSize: 18, fontWeight: 700 }}>₹</span>, color: "var(--success)" },
+              { label: "Operational Cost", val: fmtK(totalOpCost), sub: "Fuel + Maintenance expenses", icon: <FiDroplet size={18} />, color: "var(--danger)" },
+              { label: "Completion Rate", val: `${completionRate}%`, sub: `${completedTrips.length} / ${fTrips.length} trips done`, icon: <FiCheckCircle size={18} />, color: "var(--accent)" },
+              { label: "Total KM Covered", val: `${fmt(totalKM)} km`, sub: `Across all completed trips`, icon: <FiActivity size={18} />, color: "#60a5fa" },
             ].map((k, i) => (
               <div key={i} className="kpi-card" style={{ "--kpi-color": k.color }}>
                 <div className="kpi-header"><span className="kpi-label">{k.label}</span><div className="kpi-icon">{k.icon}</div></div>
@@ -318,12 +318,14 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
               </div>
               <div style={{ padding: "20px 20px 12px" }}>
                 {completedTrips.length === 0 ? <Empty /> : (
-                      <div className="bar-chart">
+                  <div className="bar-chart">
                     {MONTHLY_COST.map(m => (
                       <div key={m.month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", gap: 4 }}>
                         <div style={{ fontSize: 9, color: "var(--accent)", fontWeight: 600 }}>{m.cost > 0 ? fmtK(m.cost) : ""}</div>
-                        <div style={{ width: "100%", height: m.cost > 0 ? `${Math.round((m.cost / mxCost) * 110)}px` : "0px",
-                          background: "var(--accent)", borderRadius: "6px 6px 0 0", transition: "height 0.5s ease" }} />
+                        <div style={{
+                          width: "100%", height: m.cost > 0 ? `${Math.round((m.cost / mxCost) * 110)}px` : "0px",
+                          background: "var(--accent)", borderRadius: "6px 6px 0 0", transition: "height 0.5s ease"
+                        }} />
                         <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 4 }}>{m.month}</div>
                       </div>
                     ))}
@@ -338,12 +340,14 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
               </div>
               <div style={{ padding: "20px 20px 12px" }}>
                 {fTrips.length === 0 ? <Empty /> : (
-                      <div className="bar-chart">
+                  <div className="bar-chart">
                     {MONTHLY_TRIPS.map(m => (
                       <div key={m.month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", gap: 4 }}>
                         <div style={{ fontSize: 9, color: "var(--success)", fontWeight: 600 }}>{m.trips > 0 ? m.trips : ""}</div>
-                        <div style={{ width: "100%", height: m.trips > 0 ? `${Math.round((m.trips / mxTrips) * 110)}px` : "0px",
-                          background: "var(--success)", borderRadius: "6px 6px 0 0", transition: "height 0.5s ease" }} />
+                        <div style={{
+                          width: "100%", height: m.trips > 0 ? `${Math.round((m.trips / mxTrips) * 110)}px` : "0px",
+                          background: "var(--success)", borderRadius: "6px 6px 0 0", transition: "height 0.5s ease"
+                        }} />
                         <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 4 }}>{m.month}</div>
                       </div>
                     ))}
@@ -384,8 +388,10 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
                           <div key={v.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <div style={{ minWidth: 80, fontSize: 11, color: "var(--muted)", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{v.name}</div>
                             <div style={{ flex: 1, background: "rgba(255,255,255,0.05)", borderRadius: 4, height: 18, overflow: "hidden" }}>
-                              <div style={{ width: `${Math.round((total / mxVCost) * 100)}%`, height: "100%", borderRadius: 4, transition: "width .6s ease",
-                                background: ["var(--danger)", "rgba(251,146,60,0.85)", "var(--accent)", "var(--success)", "#60a5fa"][i] }} />
+                              <div style={{
+                                width: `${Math.round((total / mxVCost) * 100)}%`, height: "100%", borderRadius: 4, transition: "width .6s ease",
+                                background: ["var(--danger)", "rgba(251,146,60,0.85)", "var(--accent)", "var(--success)", "#60a5fa"][i]
+                              }} />
                             </div>
                             <div style={{ minWidth: 52, fontSize: 11, fontWeight: 700, textAlign: "right", color: "var(--text)" }}>{fmtK(total)}</div>
                           </div>
@@ -524,11 +530,11 @@ export default function Analytics({ user, onNavigate, onLogout, theme, onToggleT
             <div className="panel-header"><div className="panel-title"><FiDownload size={14} style={{ marginRight: 6, verticalAlign: "middle" }} />One-Click Exports</div></div>
             <div style={{ display: "flex", gap: 12, padding: "16px 20px", flexWrap: "wrap" }}>
               {[
-                { label: "Driver Payroll Report",   icon: <FiUsers    size={13} />, type: "Payroll"    },
-                { label: "Fuel Audit CSV",          icon: <FiDroplet  size={13} />, type: "Fuel"       },
-                { label: "Vehicle Health Report",   icon: <FiTool     size={13} />, type: "Health"     },
-                { label: "Trip Summary",            icon: <FiPackage  size={13} />, type: "Trips"      },
-                { label: "Driver Compliance Report",icon: <FiClipboard size={13} />, type: "Compliance" },
+                { label: "Driver Payroll Report", icon: <FiUsers size={13} />, type: "Payroll" },
+                { label: "Fuel Audit CSV", icon: <FiDroplet size={13} />, type: "Fuel" },
+                { label: "Vehicle Health Report", icon: <FiTool size={13} />, type: "Health" },
+                { label: "Trip Summary", icon: <FiPackage size={13} />, type: "Trips" },
+                { label: "Driver Compliance Report", icon: <FiClipboard size={13} />, type: "Compliance" },
               ].map(e => (
                 <button key={e.type} className="export-btn" onClick={() => handleExport(e.type)}>
                   {e.icon} {e.label}

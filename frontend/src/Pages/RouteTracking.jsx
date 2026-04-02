@@ -3,7 +3,7 @@ import { FiMapPin, FiClock, FiTruck } from 'react-icons/fi';
 import RouteTracker from '../Components/RouteTracker';
 import { Sidebar } from './Dashboard';
 import api from '../api';
-import '../Styles/global.css';
+import '../styles/global.css';
 
 export default function RouteTracking({ user, onNavigate, onLogout, theme, onToggleTheme, permissions = [] }) {
   const [cities, setCities] = useState([]);

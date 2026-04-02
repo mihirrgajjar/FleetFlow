@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../Styles/global.css";
+import "../styles/global.css";
 import api from '../api';
 import { FiGrid, FiTruck, FiPackage, FiTool, FiDroplet, FiUser, FiBarChart2, FiSun, FiMoon, FiLogOut, FiSearch, FiAlertTriangle, FiCheckCircle, FiActivity } from "react-icons/fi";
 import { LuBike } from "react-icons/lu";
@@ -15,11 +15,11 @@ const NAV_ITEMS = [
   { icon: <FiBarChart2 size={16} />, label: "Analytics", page: "analytics" },
 ];
 
-const TYPE_ICONS = { 
-  Van: <FiTruck size={14} />, 
-  Truck: <FiTruck size={14} />, 
-  "Mini-Truck": <FiTruck size={14} />, 
-  Bike: <LuBike size={14} /> 
+const TYPE_ICONS = {
+  Van: <FiTruck size={14} />,
+  Truck: <FiTruck size={14} />,
+  "Mini-Truck": <FiTruck size={14} />,
+  Bike: <LuBike size={14} />
 };
 
 // ── Role-based KPI definitions 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../Styles/global.css";
+import "../styles/global.css";
 import { FiSun, FiMoon, FiTruck, FiMail, FiLock, FiAlertTriangle, FiShield, FiUserPlus, FiX, FiBriefcase, FiHash } from "react-icons/fi";
 import ForgotPwd from "./ForgotPwd";
 import PasswordInput from "../Components/PasswordInput";

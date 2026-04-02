@@ -65,19 +65,19 @@ function DeleteDialog({ vehicle, onConfirm, onCancel }) {
             </div>
             <span>Delete Vehicle — {vehicle.id}</span>
           </div>
-          <button 
-            className="modal-close" 
-            onClick={onCancel} 
-            style={{ 
-              background: 'rgba(255,255,255,0.2)', 
-              border: '2px solid #ffffff', 
-              cursor: 'pointer', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              width: 32, 
-              height: 32, 
-              borderRadius: 8, 
+          <button
+            className="modal-close"
+            onClick={onCancel}
+            style={{
+              background: 'rgba(255,255,255,0.2)',
+              border: '2px solid #ffffff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 32,
+              height: 32,
+              borderRadius: 8,
               padding: 0,
               color: '#ffffff',
               fontSize: '18px',
@@ -190,24 +190,24 @@ function VehicleFormModal({ vehicle, isManager, onSuccess, onClose }) {
       >
         <div style={{ background: "linear-gradient(135deg, #f97316 0%, #d45d00 100%)", padding: "22px 24px", display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(255,255,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z" /></svg>
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ color: "#fff", fontSize: 18, fontWeight: 800 }}>{vehicle ? "Edit Vehicle" : "Add New Vehicle"}</div>
             <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12 }}>Update fleet inventory details</div>
           </div>
-          <button 
-            onClick={onClose} 
-            style={{ 
-              background: "rgba(255,255,255,0.2)", 
-              border: "2px solid #ffffff", 
-              borderRadius: 8, 
-              width: 32, 
-              height: 32, 
-              cursor: "pointer", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center", 
+          <button
+            onClick={onClose}
+            style={{
+              background: "rgba(255,255,255,0.2)",
+              border: "2px solid #ffffff",
+              borderRadius: 8,
+              width: 32,
+              height: 32,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               padding: 0,
               color: "#ffffff",
               fontSize: "18px",
@@ -221,7 +221,7 @@ function VehicleFormModal({ vehicle, isManager, onSuccess, onClose }) {
         <div style={{ padding: "24px", background: "var(--bg-secondary)" }}>
           {modalError && (
             <div style={{ background: "rgba(239,68,68,0.1)", color: "var(--error,#ef4444)", padding: "10px 14px", borderRadius: 8, fontSize: 13, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
               {modalError}
             </div>
           )}
@@ -281,7 +281,7 @@ function VehicleFormModal({ vehicle, isManager, onSuccess, onClose }) {
           <div style={{ display: "flex", gap: 12 }}>
             <button onClick={onClose} style={{ flex: 1, padding: "12px", border: "1.5px solid var(--border)", borderRadius: 10, background: "var(--bg-primary)", color: "var(--text)", fontWeight: 600, cursor: "pointer" }}>Cancel</button>
             <button className="vfm-btn" style={{ flex: 2 }} onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "Saving..." : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Save Vehicle</>}
+              {isSaving ? "Saving..." : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg> Save Vehicle</>}
             </button>
           </div>
         </div>
@@ -392,7 +392,7 @@ export default function VehicleRegistry({ user, onNavigate, onLogout, theme, onT
                 transition: "all 0.2s",
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
               Add Vehicle
             </button>
           </div>
