@@ -456,32 +456,29 @@ router.put("/maintenance/:id", async (req, res) => {
         const { id } = req.params;
         const { status } = req.body;
 
-        // Get current maintenance data before update for synchronization
-        const currentMaintenance = await db.query("SELECT vehicleid, status FROM maintenance_logs WHERE id=$1 AND company_id=$2", [id, cid]);
+        // Single query: update and return old + new data in one round-trip
+        const result = await db.query(
+            `UPDATE maintenance_logs SET status=$1
+             WHERE id=$2 AND company_id=$3
+             RETURNING *, (SELECT status FROM maintenance_logs WHERE id=$2) as old_status`,
+            [status, id, cid]
+        );
 
-        if (currentMaintenance.rows.length === 0) {
+        if (result.rows.length === 0) {
             return res.status(404).json({ error: "Maintenance record not found" });
         }
 
-        const maintenanceData = currentMaintenance.rows[0];
+        const maintenanceData = result.rows[0];
 
-        // CRITICAL: When maintenance is marked as completed, update vehicle status to available
-        if (status === 'completed' && maintenanceData.status !== 'completed') {
-            console.log(`🔄 SYNCHRONIZING: Maintenance ${id} completed - updating vehicle status to available`);
-
+        // Sync vehicle status only when transitioning to completed
+        if (status === 'completed' && maintenanceData.old_status !== 'completed') {
             await db.query(
                 "UPDATE vehicles SET status='available' WHERE id=$1 AND company_id=$2",
                 [maintenanceData.vehicleid, cid]
             );
-
-            console.log(`✅ SYNCHRONIZED: Vehicle ${maintenanceData.vehicleid} set to available (maintenance completed)`);
         }
 
-        const result = await db.query(
-            "UPDATE maintenance_logs SET status=$1 WHERE id=$2 AND company_id=$3 RETURNING *",
-            [status, id, cid]
-        );
-        res.json(result.rows[0]);
+        res.json(maintenanceData);
     } catch (err) {
         console.error("Error updating maintenance:", err);
         res.status(500).json({ error: err.message });
@@ -559,50 +556,49 @@ router.delete("/expenses/:id", async (req, res) => {
 router.post("/auth/login", async (req, res) => {
     try {
         const { email, password, role } = req.body;
-        const result = await db.query(
-            "SELECT * FROM users WHERE email=$1",
-            [email]
-        );
 
-        if (result.rows.length > 0) {
-            const user = result.rows[0];
+        // Single JOIN query instead of 2 sequential queries
+        const result = await db.query(`
+            SELECT u.*, c.name as company_name, c.industry as company_industry
+            FROM users u
+            LEFT JOIN companies c ON c.id = u.company_id
+            WHERE u.email = $1
+        `, [email]);
 
-            let valid = false;
-            if (user.password.startsWith("$2b$") || user.password.startsWith("$2a$")) {
-                valid = await bcrypt.compare(password, user.password);
-            } else {
-                valid = (password === user.password);
-            }
-
-            if (!valid) {
-                return res.status(401).json({ error: "Invalid credentials" });
-            }
-
-            if (user.role !== role) {
-                return res.status(401).json({
-                    error: `You are registered as ${user.role}, please login as ${user.role}`,
-                    actualRole: user.role
-                });
-            }
-
-            // Determine company_id
-            const companyId = user.company_id || (email.endsWith('@fleetflow.io') ? 'demo' : 'demo');
-
-            // Fetch company details
-            const companyRes = await db.query("SELECT name, industry FROM companies WHERE id=$1", [companyId]);
-            const company = companyRes.rows[0] || { name: "FleetFlow Demo Company", industry: "Logistics & Transportation" };
-
-            res.json({
-                id: user.id,
-                email: user.email,
-                role: user.role,
-                companyId,
-                companyName: company.name,
-                companyIndustry: company.industry
-            });
-        } else {
-            res.status(401).json({ error: "Invalid credentials" });
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: "Invalid credentials" });
         }
+
+        const user = result.rows[0];
+
+        let valid = false;
+        if (user.password.startsWith("$2b$") || user.password.startsWith("$2a$")) {
+            valid = await bcrypt.compare(password, user.password);
+        } else {
+            valid = (password === user.password);
+        }
+
+        if (!valid) {
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
+
+        if (user.role !== role) {
+            return res.status(401).json({
+                error: `You are registered as ${user.role}, please login as ${user.role}`,
+                actualRole: user.role
+            });
+        }
+
+        const companyId = user.company_id || 'demo';
+
+        res.json({
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            companyId,
+            companyName: user.company_name || "FleetFlow Demo Company",
+            companyIndustry: user.company_industry || "Logistics & Transportation"
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -772,11 +768,14 @@ router.get("/route/tracking/:tripId", async (req, res) => {
         const cid = getCompanyId(req);
         const { tripId } = req.params;
 
-        // Get trip details
-        const tripRes = await db.query(
-            "SELECT * FROM trips WHERE id=$1 AND company_id=$2",
-            [tripId, cid]
-        );
+        // Single JOIN query instead of 3 sequential queries
+        const tripRes = await db.query(`
+            SELECT t.*, v.name as vehicle_name, d.name as driver_name
+            FROM trips t
+            LEFT JOIN vehicles v ON v.id = t.vehicleid
+            LEFT JOIN drivers d ON d.id = t.driverid
+            WHERE t.id = $1 AND t.company_id = $2
+        `, [tripId, cid]);
 
         if (tripRes.rows.length === 0) {
             return res.status(404).json({ error: "Trip not found" });
@@ -784,14 +783,7 @@ router.get("/route/tracking/:tripId", async (req, res) => {
 
         const trip = tripRes.rows[0];
 
-        // Get vehicle and driver info
-        const vehicleRes = await db.query("SELECT name FROM vehicles WHERE id=$1", [trip.vehicleid]);
-        const driverRes = await db.query("SELECT name FROM drivers WHERE id=$1", [trip.driverid]);
-
-        const vehicle = vehicleRes.rows[0];
-        const driver = driverRes.rows[0];
-
-        // Generate route data
+        // Generate route data (pure CPU, no DB)
         const routeData = generateRouteAndTracking(
             trip.fromlocation,
             trip.tolocation,
@@ -802,8 +794,8 @@ router.get("/route/tracking/:tripId", async (req, res) => {
 
         res.json({
             trip_id: tripId,
-            vehicle: vehicle?.name || 'Unknown',
-            driver: driver?.name || 'Unknown',
+            vehicle: trip.vehicle_name || 'Unknown',
+            driver: trip.driver_name || 'Unknown',
             ...routeData,
         });
     } catch (err) {
