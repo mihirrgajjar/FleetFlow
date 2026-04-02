@@ -10,7 +10,11 @@ import DriverProfiles from './Pages/DriverProfiles'
 import Analytics from './Pages/Analytics'
 import InfoPage from './Pages/InfoPage'
 import './styles/global.css'
-import api from './api'
+import api, { API_ROOT } from './api'
+
+// ── Keep-alive: ping backend every 9 min to prevent Railway cold starts ──
+const PING_URL = `${API_ROOT}/api/ping`;
+const pingBackend = () => fetch(PING_URL, { method: 'GET', cache: 'no-store' }).catch(() => {});
 
 // ── Role-Based Access Control ─────────────────────────────
 // Defines which pages each role can access
@@ -36,6 +40,13 @@ function App() {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual'
     }
+  }, [])
+
+  // Keep the Railway backend warm — ping immediately on load, then every 9 min
+  useEffect(() => {
+    pingBackend(); // warm-up on first load so login is fast
+    const interval = setInterval(pingBackend, 9 * 60 * 1000);
+    return () => clearInterval(interval);
   }, [])
 
   const [page, setPage] = useState(() => {

@@ -1,16 +1,24 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const compression = require("compression");
 
 dotenv.config();
 
 const app = express();
 
+// Compress all responses - reduces payload size by ~70%
+app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Routes will be mounted here
+// Lightweight keep-alive ping - used by frontend to prevent Railway cold starts
+app.get("/api/ping", (req, res) => {
+    res.status(200).send("pong");
+});
+
+// Full health check
 app.get("/api/health", (req, res) => {
     res.json({ status: "OK", message: "Fleet Backend is running" });
 });

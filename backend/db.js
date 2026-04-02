@@ -6,6 +6,9 @@ const pool = new Pool(
     ? {
       connectionString: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false }, // Required for Railway
+      max: 10,                      // Max pool connections
+      idleTimeoutMillis: 30000,     // Close idle connections after 30s
+      connectionTimeoutMillis: 5000, // Fail fast if can't connect in 5s
     }
     : {
       user: process.env.DB_USER || "postgres",
@@ -13,6 +16,9 @@ const pool = new Pool(
       database: process.env.DB_NAME || "fleet_db",
       password: process.env.DB_PASSWORD || "admin123",
       port: process.env.DB_PORT || 5432,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
     }
 );
 
