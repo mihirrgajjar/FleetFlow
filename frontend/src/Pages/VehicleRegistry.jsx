@@ -358,14 +358,36 @@ export default function VehicleRegistry({ user, onNavigate, onLogout, theme, onT
   };
 
   const toggleRetired = async (v) => {
+    const newRetired = !v.retired;
+    const newStatus = newRetired ? "out-of-service" : "available";
+
+    // ⚡ Optimistic update — flip the UI immediately, no waiting
+    setVehicles(prev =>
+      prev.map(vehicle =>
+        vehicle.id === v.id
+          ? { ...vehicle, retired: newRetired, status: newStatus }
+          : vehicle
+      )
+    );
+
     try {
       await api.put(`/vehicles/${v.id}`, {
         ...v,
-        retired: !v.retired,
-        status: !v.retired ? "out-of-service" : "available"
+        retired: newRetired,
+        status: newStatus
       });
-      fetchVehicles();
-    } catch (err) { console.error("Error toggling retired:", err); }
+      // No need to refetch — we already updated state optimistically
+    } catch (err) {
+      console.error("Error toggling retired:", err);
+      // Revert on failure
+      setVehicles(prev =>
+        prev.map(vehicle =>
+          vehicle.id === v.id
+            ? { ...vehicle, retired: v.retired, status: v.status }
+            : vehicle
+        )
+      );
+    }
   };
 
   return (

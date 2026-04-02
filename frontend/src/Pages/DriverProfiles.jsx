@@ -227,11 +227,15 @@ export default function DriverProfiles({ user, onNavigate, onLogout, theme, onTo
   };
 
   const setStatus = async (d, status) => {
+    // ⚡ Optimistic update
+    setDrivers(prev => prev.map(driver => driver.id === d.id ? { ...driver, status } : driver));
     try {
       await api.put(`/drivers/${d.id}`, { ...d, status });
-      fetchDrivers();
+      // No need to refetch
     } catch (err) {
       console.error("Error updating status:", err);
+      // Revert on failure
+      setDrivers(prev => prev.map(driver => driver.id === d.id ? { ...driver, status: d.status } : driver));
     }
   };
 
