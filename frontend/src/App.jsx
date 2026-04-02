@@ -9,7 +9,7 @@ import FuelExpenses from './Pages/FuelExpenses'
 import DriverProfiles from './Pages/DriverProfiles'
 import Analytics from './Pages/Analytics'
 import InfoPage from './Pages/InfoPage'
-import './Styles/global.css'
+import './styles/global.css'
 import api from './api'
 
 // ── Role-Based Access Control ─────────────────────────────
