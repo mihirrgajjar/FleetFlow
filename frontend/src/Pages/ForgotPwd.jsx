@@ -2,6 +2,7 @@ import { useState } from "react";
 import "../styles/global.css";
 import { FiMail, FiLock, FiArrowLeft, FiCheckCircle, FiArrowRight, FiKey } from "react-icons/fi";
 import PasswordInput from "../Components/PasswordInput";
+import { BASE_URL } from "../api";
 
 export default function ForgotPwd({ onBack }) {
   const [step, setStep] = useState(1);
@@ -17,7 +18,7 @@ export default function ForgotPwd({ onBack }) {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/forgot-password", {
+      const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -41,7 +42,7 @@ export default function ForgotPwd({ onBack }) {
     if (otp.length < 6) return setError("OTP must be 6 digits.");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/verify-otp", {
+      const res = await fetch(`${BASE_URL}/auth/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
@@ -66,7 +67,7 @@ export default function ForgotPwd({ onBack }) {
     if (newPassword !== confirmPassword) return setError("Passwords do not match.");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/reset-password", {
+      const res = await fetch(`${BASE_URL}/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp, newPassword }),

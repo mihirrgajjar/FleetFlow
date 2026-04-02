@@ -3,6 +3,7 @@ import "../styles/global.css";
 import { FiSun, FiMoon, FiTruck, FiMail, FiLock, FiAlertTriangle, FiShield, FiUserPlus, FiX, FiBriefcase, FiHash } from "react-icons/fi";
 import ForgotPwd from "./ForgotPwd";
 import PasswordInput from "../Components/PasswordInput";
+import { BASE_URL, API_ROOT } from "../api";
 
 const ROLES = ["Manager", "Dispatcher", "Safety", "Analyst"];
 
@@ -76,7 +77,7 @@ export default function LoginPage({ onLogin, setPage }) {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, role })
@@ -110,7 +111,7 @@ export default function LoginPage({ onLogin, setPage }) {
     if (!regCompanyId.trim()) { setRegError("Company ID is required."); return; }
     setRegLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch(`${BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: regEmail, password: regPassword, role: regRole, companyId: regCompanyId.trim().toUpperCase() }),
@@ -145,7 +146,7 @@ export default function LoginPage({ onLogin, setPage }) {
     setCompLoading(true);
     try {
       const endpoint = compMode === "register" ? "/api/companies" : "/api/companies/recover";
-      const res = await fetch(`http://localhost:5000${endpoint}`, {
+      const res = await fetch(`${API_ROOT}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: compName.trim() }),
