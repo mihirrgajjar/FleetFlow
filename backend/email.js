@@ -1,10 +1,12 @@
-const SibApiV3Sdk = require("@getbrevo/brevo");
+const SibApiV3Sdk = require("sib-api-v3-sdk");
 require("dotenv").config();
 
 // ── Brevo API Client Setup ─────────────────────────────────────────────────
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-const apiKey = apiInstance.authentications["api-key"];
+const defaultClient = SibApiV3Sdk.ApiClient.instance;
+const apiKey = defaultClient.authentications["api-key"];
 apiKey.apiKey = process.env.BREVO_API_KEY;
+
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
 const SENDER_EMAIL = process.env.SENDER_EMAIL;
 const SENDER_NAME = process.env.SENDER_NAME || "FleetFlow";
